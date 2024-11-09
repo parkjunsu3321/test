@@ -3,7 +3,7 @@ from sqlalchemy.exc import IntegrityError
 from fastapi import HTTPException, status
 from .models import UserModel, ShowingsModel, MovieModel
 from dependencies.auth import hash_password
-from domains.users.dto import User, Showings, Movie, NewInputDTO
+from domains.users.dto import User, Movie, InputDTO, BookingDTO
 
 
 class UserRepository:
@@ -43,21 +43,17 @@ class UserRepository:
             self.db.refresh(db_mv)
         return db_mv
 
-    def showings_add(self, payload:Showings):
-        db_sw = ShowingsModel(
-            theater_name = payload.theater_name,
-            seat_number = payload.seat_number,
-            show_time = payload.show_time,
-            movie_id = payload.movie_info.movie_id
-        )
-        self.db.add(db_sw)
+    def update_showing(self, payload:InputDTO):
+        db_sw:ShowingsModel = self.db.query(ShowingsModel).filter(ShowingsModel.theater_name == payload.theater_name, ShowingsModel.show_time == payload.show_time).first()
+        db_sw.movie_info = payload.m_payload
+        db_sw.state = True
         self.db.commit()
         self.db.refresh(db_sw)
         return db_sw
-
-    def update_showing(self, payload:NewInputDTO):
-        db_sw:ShowingsModel = self.db.query(ShowingsModel).filter(ShowingsModel.theater_name == payload.theater_name, ShowingsModel.show_time == payload.show_time).first()
-        db_sw.seat_number = payload.seat_number
+    
+    def booking_showings(self, payload:BookingDTO):
+        db_sw:ShowingsModel = self.db.query(ShowingsModel.theater_name == payload.theater_name, ShowingsModel.show_time == payload.show_time)
+        db_sw.seat_numbers = payload.seat_number
         self.db.commit()
         self.db.refresh(db_sw)
         return db_sw

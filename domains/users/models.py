@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Date, String, Integer, func, ForeignKey
+from sqlalchemy import Column, Date, String, Integer,ARRAY, Boolean, JSON
 from sqlalchemy.orm import relationship
 
 from dependencies.database import Base
@@ -18,7 +18,7 @@ class UserModel(Base):
 class MovieModel(Base):
     __tablename__ = "movies"
 
-    movie_id = Column(Integer, primary_key=True)  # 영화 고유 ID (SERIAL)
+    movie_id = Column(Integer, primary_key=True, index=True)  # 영화 고유 ID (SERIAL)
     movie_name = Column(String(255), nullable=False)  # 영화 제목
     release_date = Column(Date, nullable=False)  # 개봉일
     audience_count = Column(Integer, nullable=False)  # 관객 수
@@ -26,9 +26,10 @@ class MovieModel(Base):
 
 class ShowingsModel(Base):
     __tablename__ = "showings"
-    serial_number = Column(Integer, primary_key=True, index=True)
-    theater_name = Column(String(255), nullable=False)
-    seat_number = Column(String, nullable=False)
-    show_time = Column(String(255), nullable=False)
-    movie_id = Column(Integer, ForeignKey('movies.movie_id'))  # 외래 키, 중복된 movie_id 제거
-    movie = relationship("MovieModel", backref="showings")  # Movie 테이블과의 관계 설정
+
+    id = Column(Integer, primary_key=True, index=True)  # id로 변경
+    movie_info = Column(JSON, nullable=True)  # movie_info를 JSON 형식으로 변경
+    theater_name = Column(String(50), nullable=False)
+    seat_numbers = Column(ARRAY(Integer), nullable=False)  # seat_numbers를 integer 배열로 수정
+    show_time = Column(String, nullable=False)
+    state = Column(Boolean, nullable=False)  # state 컬럼 추가

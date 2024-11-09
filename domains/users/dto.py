@@ -1,6 +1,6 @@
 from typing  import Optional
 from datetime import date
-from pydantic import BaseModel
+from pydantic import BaseModel, Json
 
 class User(BaseModel):
     serial_number: Optional[int] = None
@@ -20,16 +20,15 @@ class Movie(BaseModel):
     release_date: date
     audience_count: int
 
-class Showings(BaseModel):
-    theater_name: str
-    movie_info: Movie
+class MovieAddDTO(BaseModel):
+    movie_info:Movie
 
 class InputDTO(BaseModel):
-    theater_name:str
-    show_time:list
-    seat_number:list
-
-class NewInputDTO(BaseModel):
+    m_payload:Json
     theater_name:str
     show_time:str
-    seat_number:str
+
+class BookingDTO(BaseModel):
+    theater_name:str
+    show_time:str
+    seat_number:list[int]
