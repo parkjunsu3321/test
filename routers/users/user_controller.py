@@ -5,7 +5,7 @@ from domains.users.dto import LoginUser, User, Showings
 from domains.users.models import UserModel
 from dependencies.auth import verify_password,create_access_token, hash_password
 from domains.users.services import UserService
-
+from domains.users.repositories import UserRepository
 
 name = "users"
 router = APIRouter()
@@ -15,22 +15,24 @@ def login_user(lg_user: LoginUser, db: Session = Depends(provide_session)):
     result, token = UserService.login_service(lg_user, db)
     return {"message": result, "token": token}
 
-    
-
 @router.post("/register", response_model=User)
 def register_user(user: User, db: Session = Depends(provide_session)):
-    user_service = UserService(db)  # UserService 인스턴스 생성
+    user_service = UserService(user_repository=UserRepository(session=db))  # UserService 인스턴스 생성
     db_user = user_service.register_user(user)  # 서비스 계층에서 회원가입 로직 처리
     return db_user  # 클라이언트에 결과 반환
 
-@router.get("/screening_seet")
-def screening_seet(seattype:str, db:Session = Depends(provide_session)):
-    user_service = UserService(db)  # UserService 인스턴스 생성
-    showings:Showings = user_service.get_seat(seattype=seattype)
-    fruits = list(map(int, showings.seat_number.split(',')))
+@router.get("/screening_seat")
+def screening_seet(seattype:str, movie_id:int, db:Session = Depends(provide_session)):
+    user_service = UserService(user_repository=UserRepository(session=db))  # UserService 인스턴스 생성
+    showings:Showings = user_service.get_seat(seattype=seattype, movie_id=movie_id)
+    if showings.seat_number != None:
+        fruits = list(map(int, showings.seat_number.split(',')))
+    else:
+        fruits = [0] * 30
     return fruits
 
-@router.post("/screening", response_model=Showings)
-def screening(payload:Showings):
-    
-    return 0
+@router.post("/screening")
+def screening(payload:Showings, db: Session = Depends(provide_session)):
+    screen_service = UserService(user_repository=UserRepository(session=db))
+    db_sw = screen_service.insert_showings(payload)
+    return db_sw

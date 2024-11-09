@@ -21,8 +21,8 @@ class Movie(BaseModel):
     audience_count: int
 
 class Showings(BaseModel):
-    movie_name:str
-    theater_name:str
-    seat_number:int
-    show_time:str
-    movie_id:int
+    serial_number: Optional[int] = None
+    theater_name: str
+    seat_number: str
+    show_time: str
+    movie_info: Movie

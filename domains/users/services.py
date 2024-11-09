@@ -3,9 +3,8 @@ from domains import Service
 from dependencies.database import Session
 from dependencies.auth import hash_password, verify_password, create_access_token
 from .repositories import UserRepository
-from .models import UserModel
-from domains.users.dto import User, Showings, LoginUser
-
+from .models import UserModel, MovieModel
+from domains.users.dto import User, Showings, LoginUser, Movie
 
 class UserService(Service):
     def __init__(
@@ -28,9 +27,16 @@ class UserService(Service):
             return "일치하는 학번 없음", None
         
     def register_user(self, user: User):
-        # 비즈니스 로직 처리 (필요시 추가)
-        return self.user_repo.add_user(user)  # 레포지토리의 메서드를 호출하여 데이터베이스에 저장
+        return self._user_repository.add_user(user)
     
-    def get_seat(self, seattype:str):
-        showings = self._user_repository.get_seat(type=seattype)
+    def get_seat(self, seattype:str, movie_id:int):
+        showings = self._user_repository.get_seat(type=seattype, movie_id=movie_id)
         return showings
+    
+    def insert_showings(self, payload:Showings):
+        movie_dict = payload.movie_info
+        movie = self._user_repository.movie_add(movie_info=movie_dict)
+        payload.seat_number = ','.join(['0'] * 30)
+        payload.movie_info = Movie(movie_id = movie.movie_id, movie_name=movie.movie_name,release_date=movie.release_date,audience_count=movie.audience_count)
+        db_sw = self._user_repository.showings_add(payload=payload)
+        return db_sw
