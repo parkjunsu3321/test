@@ -3,8 +3,8 @@ from domains import Service
 from dependencies.database import Session
 from dependencies.auth import hash_password, verify_password, create_access_token
 from .repositories import UserRepository
-from .models import UserModel, LoginUser
-from domains.users.dto import User, Showings
+from .models import UserModel
+from domains.users.dto import User, Showings, LoginUser
 
 
 class UserService(Service):
