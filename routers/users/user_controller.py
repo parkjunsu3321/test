@@ -25,12 +25,15 @@ def register_user(user: User, db: Session = Depends(provide_session)):
 def screening_seet(db:Session = Depends(provide_session)):
     user_service = UserService(user_repository=UserRepository(session=db))  # UserService 인스턴스 생성
     showings = user_service.get_seat()
-    if showings.seat_number != None and showings.show_time != None:
-        fruits = list(map(int, showings.seat_number.split(',')))
-        showings["seat_array"] = fruits
-        fruits2 = list(map(int, showings.show_time.split(',')))
-        showings['time_array'] = fruits2
-    return showings
+    for showing in showings:
+        if showing.seat_number is not None and showing.show_time is not None:
+            fruits = list(map(int, showing.seat_number.split(',')))
+            showing["seat_array"] = fruits
+
+            # show_time을 ,로 구분하여 int 리스트로 변환
+            fruits2 = list(map(int, showing.show_time.split(',')))
+            showing["time_array"] = fruits2
+        return showings
 
 @router.post("/screening")
 def screening(payload:Showings, db: Session = Depends(provide_session)):
