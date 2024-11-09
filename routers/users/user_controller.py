@@ -22,18 +22,17 @@ def register_user(user: User, db: Session = Depends(provide_session)):
     return db_user  # 클라이언트에 결과 반환
 
 @router.get("/screening_seat")
-def screening_seet(db:Session = Depends(provide_session)):
+def screening_seet(db: Session = Depends(provide_session)):
     user_service = UserService(user_repository=UserRepository(session=db))  # UserService 인스턴스 생성
-    showings = user_service.get_seat()
+    showings = user_service.get_seat()  # showings는 ShowingsModel 객체의 리스트
+
     for showing in showings:
         if showing.seat_number is not None and showing.show_time is not None:
-            fruits = list(map(int, showing.seat_number.split(',')))
-            showing["seat_array"] = fruits
+            # seat_number와 show_time을 리스트로 변환하여 추가
+            showing.seat_array = list(map(int, showing.seat_number.split(',')))
+            showing.time_array = list(map(int, showing.show_time.split(',')))
 
-            # show_time을 ,로 구분하여 int 리스트로 변환
-            fruits2 = list(map(int, showing.show_time.split(',')))
-            showing["time_array"] = fruits2
-        return showings
+    return showings
 
 @router.post("/screening")
 def screening(payload:Showings, db: Session = Depends(provide_session)):
