@@ -32,12 +32,12 @@ class UserService(Service):
     def get_seat(self):
         showings = self._user_repository.get_seat()
         return showings
-
     
     def update_showings(self, payload:InputDTO):
         redata = self._user_repository.update_showing(payload=payload)
         return redata
     
     def booking_showings(self, payload:BookingDTO):
+        payload.seat_number = [1 if seat == 2 else seat for seat in payload.seat_number]
         redata = self._user_repository.booking_showings(payload=payload)
         return redata

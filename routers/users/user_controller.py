@@ -2,7 +2,7 @@ from fastapi import FastAPI, APIRouter, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from dependencies.database import provide_session, Session
 from domains.users.dto import LoginUser, User, MovieAddDTO, InputDTO, BookingDTO
-from domains.users.models import UserModel
+from domains.users.models import UserModel, ShowingsModel
 from dependencies.auth import verify_password,create_access_token, hash_password
 from domains.users.services import UserService
 from domains.users.repositories import UserRepository
@@ -38,5 +38,5 @@ def update_mv(payload:InputDTO, db: Session = Depends(provide_session)):
 @router.post("/booking")
 def booking_mv(payload:BookingDTO ,db:Session = Depends(provide_session)):
     screen_service = UserService(user_repository=UserRepository(session=db))
-    redata = screen_service.booking_showings(payload=payload)
-    return redata
+    redata:ShowingsModel = screen_service.booking_showings(payload=payload)
+    return redata.seat_numbers
