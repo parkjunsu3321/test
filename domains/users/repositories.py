@@ -52,7 +52,7 @@ class UserRepository:
         return db_sw
     
     def booking_showings(self, payload:BookingDTO):
-        db_sw:ShowingsModel = self.db.query(ShowingsModel.theater_name == payload.theater_name, ShowingsModel.show_time == payload.show_time)
+        db_sw:ShowingsModel = self.db.query(ShowingsModel.theater_name == payload.theater_name, ShowingsModel.show_time == payload.show_time).first()
         db_sw.seat_numbers = payload.seat_number
         self.db.commit()
         self.db.refresh(db_sw)
