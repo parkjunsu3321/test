@@ -1,7 +1,7 @@
 from fastapi import FastAPI, APIRouter, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from dependencies.database import provide_session, Session
-from domains.users.dto import LoginUser, User, Showings
+from domains.users.dto import LoginUser, User, Showings, InputDTO
 from domains.users.models import UserModel
 from dependencies.auth import verify_password,create_access_token, hash_password
 from domains.users.services import UserService
@@ -22,17 +22,24 @@ def register_user(user: User, db: Session = Depends(provide_session)):
     return db_user  # 클라이언트에 결과 반환
 
 @router.get("/screening_seat")
-def screening_seet(seattype:str, movie_id:int, db:Session = Depends(provide_session)):
+def screening_seet(db:Session = Depends(provide_session)):
     user_service = UserService(user_repository=UserRepository(session=db))  # UserService 인스턴스 생성
-    showings:Showings = user_service.get_seat(seattype=seattype, movie_id=movie_id)
-    if showings.seat_number != None:
+    showings = user_service.get_seat()
+    if showings.seat_number != None and showings.show_time != None:
         fruits = list(map(int, showings.seat_number.split(',')))
-    else:
-        fruits = [0] * 30
-    return fruits
+        showings["seat_array"] = fruits
+        fruits2 = list(map(int, showings.show_time.split(',')))
+        showings['time_array'] = fruits2
+    return showings
 
 @router.post("/screening")
 def screening(payload:Showings, db: Session = Depends(provide_session)):
     screen_service = UserService(user_repository=UserRepository(session=db))
     db_sw = screen_service.insert_showings(payload)
     return db_sw
+
+@router.post("/booking")
+def booking_mv(payload:InputDTO, db: Session = Depends(provide_session)):
+    screen_service = UserService(user_repository=UserRepository(session=db))
+    redata = screen_service.update_showings(payload=payload)
+    return 0

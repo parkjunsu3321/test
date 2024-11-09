@@ -3,7 +3,7 @@ from sqlalchemy.exc import IntegrityError
 from fastapi import HTTPException, status
 from .models import UserModel, ShowingsModel, MovieModel
 from dependencies.auth import hash_password
-from domains.users.dto import User, Showings, Movie
+from domains.users.dto import User, Showings, Movie, NewInputDTO
 
 
 class UserRepository:
@@ -26,20 +26,9 @@ class UserRepository:
         self.db.refresh(db_user)
         return db_user
     
-    def get_seat(self, type:str, movie_id:int):
-        showings = self.db.query(ShowingsModel).filter(ShowingsModel.theater_name == type, ShowingsModel.movie_id == movie_id).first()
+    def get_seat(self):
+        showings = self.db.query(ShowingsModel).all()
         return showings
-    
-    def add_showing(self, showing_data: Showings):
-        db_showing = ShowingsModel(
-            theater_name=showing_data.theater_name,
-            show_time=showing_data.show_time,  
-            movie_id=showing_data.movie_id
-        )
-        self.db.add(db_showing)
-        self.db.commit()
-        self.db.refresh(db_showing)
-        return db_showing
     
     def movie_add(self, movie_info:Movie):
         db_mv = MovieModel(
@@ -48,9 +37,10 @@ class UserRepository:
             release_date = movie_info.release_date,
             audience_count = movie_info.audience_count
         )
-        self.db.add(db_mv)
-        self.db.commit()
-        self.db.refresh(db_mv)
+        if self.db.query(MovieModel).filter(MovieModel.movie_id != movie_info.movie_id):
+            self.db.add(db_mv)
+            self.db.commit()
+            self.db.refresh(db_mv)
         return db_mv
 
     def showings_add(self, payload:Showings):
@@ -61,6 +51,13 @@ class UserRepository:
             movie_id = payload.movie_info.movie_id
         )
         self.db.add(db_sw)
+        self.db.commit()
+        self.db.refresh(db_sw)
+        return db_sw
+
+    def update_showing(self, payload:NewInputDTO):
+        db_sw:ShowingsModel = self.db.query(ShowingsModel).filter(ShowingsModel.theater_name == payload.theater_name, ShowingsModel.show_time == payload.show_time).first()
+        db_sw.seat_number = payload.seat_number
         self.db.commit()
         self.db.refresh(db_sw)
         return db_sw
