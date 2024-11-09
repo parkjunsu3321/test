@@ -12,7 +12,7 @@ class UserModel(Base):
     id = Column(String(255), unique=True, nullable=False)
     nickname = Column(String(255))
     password = Column(String(255), nullable=False)
-    birth_date = Column(Date)
+    birth_date = Column(String(255))
 
     
 class MovieModel(Base):

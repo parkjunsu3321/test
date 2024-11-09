@@ -8,7 +8,7 @@ class User(BaseModel):
     name: str
     nickname: str
     password: str
-    birth_date: date
+    birth_date: str
 
 class LoginUser(BaseModel):
     id: str
