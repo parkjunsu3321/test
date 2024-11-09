@@ -4,6 +4,7 @@ import requests
 
 class APIService(Service):
     def get_daily_box_office(API_KEY ,URL,date, item_per_page=10, page_no=1, multi_movie_yn=None, rep_nation_cd=None, wide_area_cd=None):
+        date = date + "15"
         params = {
             "key": API_KEY,         # 발급받은 API Key
             "targetDt": date,       # 조회할 날짜 (형식: YYYYMMDD)
@@ -53,4 +54,5 @@ class APIService(Service):
                     posters.append('No poster available for this movie.')
             else:
                 posters.append('No movie found with that name.')
+
         return posters
